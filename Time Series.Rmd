@@ -1,0 +1,57 @@
+---
+title: "Time Series"
+author: "Thomas Selhorst"
+date: "21. Mai 2015"
+output: html_document
+---
+
+#Einleitung
+In diesem Dokument wird die Bearbeitung von Zeitreihen vorgestellt. Zeitreihen verknüpfen *time stamps* mit Daten, die den Zeitpunkten zugeordnet sind. Hier sind Zeitpunkte Datumsangaben im Format %Y-%m-%d (Jahr, Monat, Tag).
+
+Es werden Daten eingelesen, um die Erstellung und Bearbeitung von Zeitreihen zu demonstrieren. Der Datensatz beschreibt zeitaufgelöst die Anzahl der Tierbewegungen (die Anzahl der gehandelten Tiere) zu einem Knoten udn aus dem Knoten heraus.
+
+Die Variablen sind:
+
+  * **Date** kalendarisches Datum
+  * **Vol_in** Volumne der zugekauften Tiere (Stk)
+  * **Vol_out** Volumen der verkauftern Tiere (Stk)
+  * **Freq_in** Anzahl der eingehenden Handelskontakte
+  * **Freq_out** Anzahl der ausgehende Handelskontakte
+  
+
+```{r}
+data <- read.csv(file = "./Data/trade.csv",
+                 sep=',',
+                 header=TRUE)
+str(data)
+```
+
+An obiger Tabelle erkennt man, dass Date als Faktor identifiziert wurde. Die Umwandlung von Date in ein Datum und die Erstellung eines Zeitreihen Objektes erfolgt so:
+```{r}
+library(lubridate)
+library(zoo)
+data$Date <- ymd(data$Date)
+str(data)
+
+Q.z <- zoo(data$Freq_in, order.by=data$Date)
+```
+Das Zeitreihen Objekt Q.z kann direkt geplottet werden.
+```{r}
+plot(Q.z)
+```
+
+
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+summary(cars)
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
