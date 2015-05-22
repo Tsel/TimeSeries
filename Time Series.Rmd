@@ -34,13 +34,25 @@ data$Date <- ymd(data$Date)
 str(data)
 
 Q.z <- zoo(data$Freq_in, order.by=data$Date)
+is.ts(Q.z)
+as.ts(Q.z)
+Q.z
 ```
 Das Zeitreihen Objekt Q.z kann direkt geplottet werden.
 ```{r}
 plot(Q.z)
 ```
 
+Das Objet Q.z kann über dygraph TimeSeries weiterverarbeitet werde.
+```{r}
+library(dygraphs)
+dygraph(Q.z) %>%
+  dyRangeSelector() %>%
+  dyRoller(rollPeriod = 7)
+```
 
+##References
+Weiterführende Information zu dygraph findet sich unter <http://rstudio.github.io/dygraphs/index.html>.
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
