@@ -4,11 +4,17 @@ author: "Thomas Selhorst"
 date: "21. Mai 2015"
 output: html_document
 ---
+```{r,echo=FALSE,results='hide'}
+library(lubridate)
+library(zoo)
+library(dygraphs)
+```
 
-#Einleitung
-In diesem Dokument wird die Bearbeitung von Zeitreihen vorgestellt. Zeitreihen verknüpfen *time stamps* mit Daten, die den Zeitpunkten zugeordnet sind. Hier sind Zeitpunkte Datumsangaben im Format %Y-%m-%d (Jahr, Monat, Tag).
 
-Es werden Daten eingelesen, um die Erstellung und Bearbeitung von Zeitreihen zu demonstrieren. Der Datensatz beschreibt zeitaufgelöst die Anzahl der Tierbewegungen (die Anzahl der gehandelten Tiere) zu einem Knoten udn aus dem Knoten heraus.
+##Einleitung
+In diesem Dokument wird die Visualisierung und Bearbeitung von Zeitreihen vorgestellt. Zeitreihen verknüpfen *time stamps* mit Daten, die den Zeitpunkten zugeordnet sind. Hier sind Zeitpunkte Datumsangaben im Format %Y-%m-%d (Jahr, Monat, Tag).
+
+Es werden Beispieldaten eingelesen, um die Erstellung und Visualisierung von Zeitreihen zu demonstrieren. Der Datensatz beschreibt zeitaufgelöst die Anzahl der Tierbewegungen (die Anzahl der gehandelten Tiere [Stück]) zu einem Knoten und aus dem Knoten heraus in inem Handelsnetzwerk.
 
 Die Variablen sind:
 
@@ -18,7 +24,6 @@ Die Variablen sind:
   * **Freq_in** Anzahl der eingehenden Handelskontakte
   * **Freq_out** Anzahl der ausgehende Handelskontakte
   
-
 ```{r}
 data <- read.csv(file = "./Data/trade.csv",
                  sep=',',
@@ -26,44 +31,37 @@ data <- read.csv(file = "./Data/trade.csv",
 str(data)
 ```
 
-An obiger Tabelle erkennt man, dass Date als Faktor identifiziert wurde. Die Umwandlung von Date in ein Datum und die Erstellung eines Zeitreihen Objektes erfolgt so:
+
+Die vorgestellte Vorgehensweise indentifiziert Date als Faktor. Die erforderliche Umwandlung in ein Datum und die Erstellung eines Zeitreihen Objektes erfolgt unter Verwendung der Bibliotheken [lubridate](<http://cran.r-project.org/web/packages/lubridate/lubridate.pdf>) und [zoo](<http://cran.r-project.org/web/packages/zoo/zoo.pdf>).
+
 ```{r}
 library(lubridate)
 library(zoo)
 data$Date <- ymd(data$Date)
 str(data)
 
-Q.z <- zoo(data$Freq_in, order.by=data$Date)
-is.ts(Q.z)
-as.ts(Q.z)
-Q.z
-```
-Das Zeitreihen Objekt Q.z kann direkt geplottet werden.
-```{r}
-plot(Q.z)
+Freq_in.ts <- zoo(data$Freq_in, order.by=data$Date)
+Freq_out.ts <- zoo(data$Freq_out, order.by=data$Date)
+Vol_in.ts <- zoo(data$Vol_in, order.by=data$Date)
+Vol_out.ts <- zoo(data$Vol_out, order.by=data$Date)
 ```
 
-Das Objet Q.z kann über dygraph TimeSeries weiterverarbeitet werde.
+Die Zeitreihen Objekte können über [dygraph](<http://rstudio.github.io/dygraphs/index.html>) weiterverarbeitet werden.
 ```{r}
 library(dygraphs)
-dygraph(Q.z) %>%
-  dyRangeSelector() %>%
-  dyRoller(rollPeriod = 7)
+dygraph(Freq_out.ts) %>%
+  dyRangeSelector() %>%      # add range selector
+  dyRoller(rollPeriod = 7)   # add roller (average over period, e.g. 7 days)
 ```
 
-##References
-Weiterführende Information zu dygraph findet sich unter <http://rstudio.github.io/dygraphs/index.html>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Details
+> Zusammenfassung von Zeitreihen und Achsenbeschriftung
 
 ```{r}
-summary(cars)
+Freq.ts <- cbind(Freq_in.ts, Freq_out.ts)
+dygraph(Freq.ts) %>%
+  dyRangeSelector() %>%      # add range selector
+  dyRoller(rollPeriod = 7) %>%   # add roller (average over period, e.g. 7 days)  
+  dyAxis("y", label = "Trade Frequency")
 ```
 
-You can also embed plots, for example:
-
-```{r, echo=FALSE}
-plot(cars)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
